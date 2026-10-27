@@ -1,0 +1,13 @@
+import { createClient } from '@libsql/client';
+const client = createClient({ url: process.env.DATABASE_URL!, authToken: process.env.DATABASE_AUTH_TOKEN });
+const columns = (await client.execute('PRAGMA table_info(generation_jobs)')).rows.map(row => row.name);
+const statements: string[] = [];
+if (!columns.includes('duration_ms')) statements.push('ALTER TABLE generation_jobs ADD COLUMN duration_ms INTEGER');
+if (!columns.includes('actual_cost')) statements.push('ALTER TABLE generation_jobs ADD COLUMN actual_cost INTEGER');
+statements.push('CREATE TABLE IF NOT EXISTS manual_payment_approvals (id TEXT PRIMARY KEY NOT NULL, reference TEXT NOT NULL UNIQUE, user_id TEXT NOT NULL, owner_id TEXT NOT NULL, plan TEXT NOT NULL, method TEXT NOT NULL, amount_mmk INTEGER NOT NULL, credits INTEGER NOT NULL, approved_at INTEGER NOT NULL, period_end INTEGER NOT NULL)');
+statements.push('CREATE TABLE IF NOT EXISTS owner_approval_attempts (id TEXT PRIMARY KEY NOT NULL, created_at INTEGER NOT NULL)');
+await client.batch(statements, 'write');
+const names = (await client.execute('PRAGMA table_info(generation_jobs)')).rows.map(row => row.name);
+if (!names.includes('duration_ms') || !names.includes('actual_cost')) throw new Error('Migration verification failed');
+console.log('Additive manual approval and duration migration verified.');
+client.close();

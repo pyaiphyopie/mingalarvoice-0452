@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "icon": "./assets/icon.png",
+    "android": {
+      "package": "com.mingalarvoice.k7q2",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#101010"
+      }
+    },
+    "extra": {
+      "apiUrl": "https://mingala-ib22nx7-preview-4200.runable.site/",
+      "applicationId": "mingala-ib22nx7",
+      "runableAuthIssuer": "https://api.runable.com/api/auth"
+    },
+    "ios": {
+      "bundleIdentifier": "com.mingalarvoice.k7q2",
+      "supportsTablet": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "name": "Mingalar Voice",
+    "slug": "mingalar-voice",
+    "version": "1.0.0",
+    "scheme": "runable-mingala-ib22nx7",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-font",
+      "expo-iap",
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#101010",
+          "imageWidth": 200
+        }
+      ]
+    ]
+  }
+}

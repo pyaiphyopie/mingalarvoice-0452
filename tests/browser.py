@@ -1,0 +1,58 @@
+import asyncio, json, time
+from playwright.async_api import async_playwright
+
+async def main():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(executable_path='/usr/bin/google-chrome', headless=True, args=['--no-sandbox'])
+        page = await browser.new_page(viewport={'width':390,'height':844})
+        await page.goto('http://localhost:4200/studio')
+        await page.get_by_role('button', name='Try a sample').click()
+        assert len(await page.get_by_role('textbox', name='Burmese script').input_value()) > 10
+        await page.get_by_role('button', name='Generate voice').click()
+        await page.get_by_text('Sign in to continue.', exact=False).wait_for()
+        assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        await page.screenshot(path='/home/user/mingalar-studio-mobile.png', full_page=True)
+        await page.goto('http://localhost:4200/voices')
+        await page.get_by_role('textbox', name='Search voices').fill('ကိုမင်း')
+        await page.get_by_role('heading', name='ကိုမင်း', exact=True).wait_for()
+        assert await page.locator('audio').count() == 0
+        await page.get_by_text('မြန်မာ · Burmese', exact=True).wait_for()
+        await page.get_by_role('button', name='Use this voice', exact=True).click()
+        await page.wait_for_url('**/studio')
+        assert await page.get_by_role('combobox', name='Select voice').input_value() == 'JBFqnCBsd6RMkjVDRZzb'
+        assert await page.locator('audio').count() == 0
+        await page.get_by_text('Burmese preview unavailable', exact=False).wait_for()
+        await page.goto('http://localhost:4200/voices')
+        await page.get_by_role('textbox', name='Search voices').fill('ကိုအောင်')
+        player = page.get_by_label('Burmese preview for ကိုအောင်', exact=True)
+        await player.wait_for()
+        assert '/audio/burmese-previews/CwhRBWXzGAHq8TQ4Fs17.mp3' in await player.get_attribute('src')
+        await player.evaluate('(el) => el.play()')
+        await page.wait_for_function('document.querySelector("audio")?.currentTime > 0')
+        await player.evaluate('(el) => el.pause()')
+        assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        await page.goto('http://localhost:4200/sign-in')
+        await page.get_by_role('button', name='Create account', exact=True).click()
+        await page.get_by_role('textbox', name='Your name', exact=True).fill('QA Test')
+        await page.get_by_role('textbox', name='Email address', exact=True).fill(f'qa-{time.time_ns()}@example.invalid')
+        await page.get_by_role('textbox', name='Password', exact=True).fill('Mingalar-QA-Only-864235')
+        await page.get_by_role('button', name='Create account', exact=True).click()
+        await page.wait_for_url('**/studio', timeout=20000)
+        await page.get_by_text('Generation enabled.', exact=True).wait_for()
+        await page.get_by_role('button', name='Try a sample').click()
+        await page.get_by_role('button', name='Generate voice').click()
+        await page.get_by_text('An active subscription is required.', exact=False).wait_for()
+        await page.goto('http://localhost:4200/history')
+        await page.get_by_role('heading', name='A blank page. A fresh start.').wait_for()
+        await page.goto('http://localhost:4200/voices')
+        await page.get_by_role('textbox', name='Search voices').fill('ကိုမင်း')
+        await page.get_by_role('button', name='Save ကိုမင်း', exact=True).click()
+        await page.get_by_role('button', name='Favorites', exact=True).click()
+        await page.get_by_role('heading', name='ကိုမင်း', exact=True).wait_for()
+        await page.reload()
+        await page.get_by_role('button', name='Favorites', exact=True).click()
+        await page.get_by_role('heading', name='ကိုမင်း', exact=True).wait_for()
+        print(json.dumps({'mobile_no_overflow':True,'guest_guard':True,'catalog_search':True,'email_signup':True,'generation_enabled_status':True,'unpaid_access_guard':True,'empty_history':True,'favorite_persistence':True}))
+        await browser.close()
+
+asyncio.run(main())

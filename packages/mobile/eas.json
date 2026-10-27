@@ -1,0 +1,21 @@
+{
+  "build": {
+    "production": {
+      "autoIncrement": true
+    },
+    "preview": {
+      "distribution": "internal"
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascApiKeyPath": "./keys/AuthKey.p8",
+        "appleId": "phyopie96@icloud.com"
+      }
+    }
+  },
+  "cli": {
+    "appVersionSource": "remote"
+  }
+}
